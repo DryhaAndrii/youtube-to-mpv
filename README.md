@@ -6,7 +6,7 @@ A tiny Windows utility: paste a YouTube link, choose quality, and it plays in `m
 - `ytPlayer.hta` — simple GUI (HTML Application, ActiveX).
 - `ytPlayer.ahk` — GUI written in AutoHotkey v1.
 - `batnik.bat` — console menu.
-- `mpv.exe`, `mpv.com` — the mpv player (not included in the repo).
+- `mpv.exe`, `mpv.com` — the mpv player (not included in the repo, can be downloaded here https://drive.google.com/drive/folders/1mBnF-koaapXOIHl2rcO7TUM2ARnyol6i?usp=sharing).
 - `yt-dlp.exe` — used by mpv to fetch YouTube streams (not included in the repo).
 - `url.txt` — stores the last entered URL (git-ignored).
 
@@ -29,3 +29,4 @@ Available: 360p, 480p, 720p, 1080p, Best, Audio. Under the hood this sets mpv's 
 
 ## License
 MIT — see `LICENSE`.
+
