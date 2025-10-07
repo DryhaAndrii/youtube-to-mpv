@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>YouTube Player (MPV)</title>
+    <HTA:APPLICATION
+        ID="YouTubePlayer"
+        APPLICATIONNAME="YouTube Player"
+        BORDER="dialog"
+        CAPTION="yes"
+        SHOWINTASKBAR="yes"
+        SINGLEINSTANCE="yes"
+        SYSMENU="yes"
+        SCROLL="no"
+        WINDOWSTATE="normal"
+    />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta charset="utf-8" />
+    <style>
+        html, body { height: 100%; }
+        body {
+            font-family: Segoe UI, Tahoma, Arial, sans-serif;
+            margin: 0; padding: 16px; background: #1e1e1e; color: #ddd;
+        }
+        .container { max-width: 720px; margin: 0 auto; }
+        h1 { font-size: 18px; margin: 0 0 12px 0; color: #fff; }
+        .row { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
+        label { width: 90px; color: #bbb; }
+        input[type=text] {
+            flex: 1; padding: 8px 10px; border-radius: 6px; border: 1px solid #444;
+            background: #262626; color: #eee; outline: none;
+        }
+        select {
+            padding: 8px 10px; border-radius: 6px; border: 1px solid #444;
+            background: #262626; color: #eee; outline: none;
+        }
+        .actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 12px; }
+        button {
+            padding: 8px 14px; border: 1px solid #555; border-radius: 6px; cursor: pointer;
+            background: #3a3a3a; color: #fff;
+        }
+        button.primary { background: #0e639c; border-color: #0b4f7a; }
+        .hint { font-size: 12px; color: #aaa; margin-top: 6px; }
+        .footer { margin-top: 12px; font-size: 11px; color: #888; }
+    </style>
+    <script type="text/javascript">
+        function getAppDir() {
+            var path = unescape(location.pathname.replace(/\//g, '\\'));
+            if (path.charAt(0) === '\\') path = path.substring(1);
+            return path.substring(0, path.lastIndexOf('\\'));
+        }
+
+        function mapFormat(label) {
+            switch (label) {
+                case '360p': return 'best[height<=360]';
+                case '480p': return 'best[height<=480]';
+                case '720p': return 'best[height<=720]';
+                case '1080p': return 'best[height<=1080]';
+                case 'Best': return 'best';
+                case 'Audio': return 'bestaudio';
+                default: return 'best';
+            }
+        }
+
+        function readLastUrl() {
+            try {
+                var fso = new ActiveXObject('Scripting.FileSystemObject');
+                var filePath = getAppDir() + '\\url.txt';
+                if (fso.FileExists(filePath)) {
+                    var ts = fso.OpenTextFile(filePath, 1, false, -1); // ForReading
+                    var txt = ts.ReadAll();
+                    ts.Close();
+                    document.getElementById('url').value = txt.replace(/\r?\n/g, '').trim();
+                }
+            } catch (e) {
+                // ignore
+            }
+        }
+
+        function saveLastUrl(url) {
+            try {
+                var fso = new ActiveXObject('Scripting.FileSystemObject');
+                var filePath = getAppDir() + '\\url.txt';
+                var ts = fso.OpenTextFile(filePath, 2, true, -1); // ForWriting, create if missing
+                ts.Write(url);
+                ts.Close();
+            } catch (e) {
+                // ignore
+            }
+        }
+
+        function pasteFromClipboard() {
+            try {
+                var dummy = document.getElementById('url');
+                dummy.focus();
+                document.execCommand('paste');
+            } catch (e) {
+                // ignore
+            }
+        }
+
+        function play() {
+            var url = document.getElementById('url').value.trim();
+            if (!url) { alert('Please enter a video URL.'); return; }
+
+            var quality = document.getElementById('quality').value;
+            var format = mapFormat(quality);
+
+            var appDir = getAppDir();
+            var mpvExe = appDir + '\\mpv.exe';
+            var fso = new ActiveXObject('Scripting.FileSystemObject');
+            if (!fso.FileExists(mpvExe)) {
+                alert('mpv.exe not found in the application folder:\n' + appDir);
+                return;
+            }
+
+            var cmd = '"' + mpvExe + '" --ytdl-format="' + format + '" "' + url + '"';
+            try {
+                var shell = new ActiveXObject('WScript.Shell');
+                shell.CurrentDirectory = appDir;
+                saveLastUrl(url);
+                shell.Run(cmd, 1, false); // show mpv window, do not wait
+            } catch (e) {
+                alert('Failed to launch MPV: ' + e.message);
+            }
+        }
+
+        function onReady() {
+            readLastUrl();
+            document.getElementById('url').focus();
+        }
+
+        window.onload = onReady;
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>YouTube Player &rarr; MPV</h1>
+
+        <div class="row">
+            <label for="url">URL</label>
+            <input id="url" type="text" placeholder="https://www.youtube.com/watch?v=..." />
+            <button onclick="pasteFromClipboard()">Paste</button>
+        </div>
+
+        <div class="row">
+            <label for="quality">Quality</label>
+            <select id="quality">
+                <option>360p</option>
+                <option>480p</option>
+                <option selected>720p</option>
+                <option>1080p</option>
+                <option>Best</option>
+                <option>Audio</option>
+            </select>
+        </div>
+
+        <div class="actions">
+            <button onclick="window.close()">Close</button>
+            <button class="primary" onclick="play()">&#9654; Play</button>
+        </div>
+
+        <div class="hint">The player looks for `yt-dlp.exe` in the current folder. Keep files together.</div>
+        <div class="footer">Console-free HTA app. Double-click `ytPlayer.hta` to launch.</div>
+    </div>
+</body>
+</html>
+
+

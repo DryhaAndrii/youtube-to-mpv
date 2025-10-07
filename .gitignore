@@ -1,0 +1,26 @@
+# Binaries and archives
+mpv.exe
+yt-dlp.exe
+
+# Runtime files
+url.txt
+
+# System files
+Thumbs.db
+Desktop.ini
+
+# Logs
+*.log
+
+# Editors/IDE
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Node/npm leftovers (if any)
+node_modules/
+
+
